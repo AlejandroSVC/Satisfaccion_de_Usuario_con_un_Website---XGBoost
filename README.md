@@ -44,6 +44,9 @@ from matplotlib import pyplot
 ### Display correlation matrix
 
 sns.heatmap(df.corr(), cmap='coolwarm')
+
+![Correls](docs/assets/images/Correlation_matrix.png)
+
 ### Dataset: extract features and target
 
 X = df.drop('Satisfaction',axis=1)
@@ -117,6 +120,8 @@ plt.title('Feature Importance')
 
 plt.show()
 
+![Features](docs/assets/images/Features_importance.png)
+
 ### Plot actual vs predicted values, and actual vs predicted residuals
 
 import matplotlib.pyplot as plt
@@ -144,5 +149,9 @@ fig, axes = plt.subplots(1, 2, figsize=(8, 4))
 PredictionErrorDisplay.from_estimator(reg, X, y, ax=axes[0], kind="actual_vs_predicted")
 
 PredictionErrorDisplay.from_estimator(reg, X, y, ax=axes[1], kind="residual_vs_predicted")
+
+![Plots](docs/assets/images/Predicted_plots.png)
+
+
 
 plt.show()
