@@ -150,8 +150,7 @@ PredictionErrorDisplay.from_estimator(reg, X, y, ax=axes[0], kind="actual_vs_pre
 
 PredictionErrorDisplay.from_estimator(reg, X, y, ax=axes[1], kind="residual_vs_predicted")
 
+plt.show()
+
 ![Plots](docs/assets/images/Predicted_plots.png)
 
-
-
-plt.show()
