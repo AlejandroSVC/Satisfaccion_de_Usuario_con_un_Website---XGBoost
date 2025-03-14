@@ -21,6 +21,8 @@ df.info()
 
 import xgboost as xgb
 
+import numpy as np
+
 import seaborn as sns
 
 from numpy import asarray
