@@ -90,21 +90,22 @@ explained_var = explained_variance_score(y_test, y_pred)
 
 ### Print the evaluation metrics
 
-print("MAPE:", mape)
+print("MAPE, mean absolute percentage error:", mape)
 
-print("Mean squared error:", mse)
+print("MSE, Mean squared error:", mse)
 
-print("Root mean squared error:", rmse)
+print("RMSE, Root mean squared error:", rmse)
 
-print("Mean absolute error:", mae)
+print("MAE, Mean absolute error:", mae)
 
-print("R-squared:", r2)
+print("R2, R-squared:", r2)
 
 print("Explained variance:", explained_var)
 
 ### Feature importance
 
 importance = model.feature_importances_
+
 print(importance)
 
 ### Plot feature importance
@@ -169,13 +170,21 @@ from sklearn.inspection import permutation_importance
 perm_importance = permutation_importance(model, X_test, y_test, n_repeats=10, random_state=42)
 
 sorted_idx = perm_importance.importances_mean.argsort()
+
 plt.figure(figsize=(10, 6))
+
 plt.barh(range(len(sorted_idx)), perm_importance.importances_mean[sorted_idx], align='center')
+
 plt.yticks(range(len(sorted_idx)), [f'feature_{i}' for i in sorted_idx])
+
 plt.xlabel('Permutation Feature Importance')
+
 plt.ylabel('Feature')
+
 plt.title('Permutation Feature Importance (XGBoost)')
+
 plt.tight_layout()
+
 plt.show()
 
 ![Permutation](docs/assets/images/Permutation_feature_importance.png)
@@ -194,7 +203,9 @@ from yellowbrick.regressor import PredictionError
 visualizer = PredictionError(model)
 
 visualizer.fit(X_train, y_train)  # Fit the training data to the visualizer
+
 visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
 visualizer.show()                 # Finalize and render the figure
 
 ![Prediction](docs/assets/images/Prediction_error_plot.png)
@@ -206,7 +217,9 @@ from yellowbrick.regressor import ResidualsPlot
 visualizer = ResidualsPlot(model)
 
 visualizer.fit(X_train, y_train)  # Fit the training data to the visualizer
+
 visualizer.score(X_test, y_test)  # Evaluate the model on the test data
+
 visualizer.show()                 # Finalize and render the figure
 
 ![Residuals](docs/assets/images/Residuals_plot_on_training_and_testing_data.png)
