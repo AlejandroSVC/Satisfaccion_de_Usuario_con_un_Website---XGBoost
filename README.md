@@ -12,9 +12,9 @@ computational speed and model performance.
 import os
 import pandas as pd
 
-os.chdir('C:/Users/Alejandro/Documents/')
+os.chdir('dir')
 
-df = pd.read_csv('website365.csv')
+df = pd.read_csv('data.csv')
 
 df.info()
 ### Import libraries
