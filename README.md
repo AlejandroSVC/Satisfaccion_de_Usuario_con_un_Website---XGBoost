@@ -10,13 +10,15 @@ computational speed and model performance.
 ### Set working directory and load data
 
 import os
+
 import pandas as pd
 
 os.chdir('dir')
 
-df = pd.read_csv('data.csv')
+df = pd.read_csv('website365.csv')
 
 df.info()
+
 ### Import libraries
 
 import xgboost as xgb
@@ -50,7 +52,9 @@ sns.heatmap(df.corr(), cmap='coolwarm')
 ### Dataset: extract features and target
 
 X = df.drop('Satisfaction',axis=1)
+
 y = df['Satisfaction']
+
 ### Split the data into Train and Test datasets
 
 from sklearn.model_selection import train_test_split
