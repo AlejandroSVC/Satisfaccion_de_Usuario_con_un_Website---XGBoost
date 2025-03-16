@@ -1,5 +1,4 @@
-# Website user satisfaction
-Predicting user satisfaction using xgBoost Regression
+# Predicting website user satisfaction using xgBoost Regression
 
 ### XGBOOST Machine Learning model
 XGBoost stands for eXtreme Gradient Boosting. It is focused on
