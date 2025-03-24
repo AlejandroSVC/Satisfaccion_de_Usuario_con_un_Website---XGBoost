@@ -1,7 +1,7 @@
 # Predicting website user satisfaction
 ## Using xgBoost Machine Learning Regression with Python
 
-![Banner delgado](docs/assets/images/Banner_delgado_1.jpg)
+![Banner delgado](docs/assets/images/Internet_users.jpg)
 
 ### XGBOOST Machine Learning model
 
