@@ -106,6 +106,22 @@ print(f"MAE, Mean absolute error:", round(mae,5))
 print(f"R2, R-squared:", round(r2,5))
 print(f"Explained variance:", round(explained_var,5))
 ```
+OUTPUT
+
+Evaluation Metrics:
+
+MAPE, mean absolute percentage error: 0.01529
+
+MSE, Mean squared error: 0.02494
+
+RMSE, Root mean squared error: 0.15792
+
+MAE, Mean absolute error: 0.06406
+
+R2, R-squared: 0.99271
+
+Explained variance: 0.99331
+
 ### 9. Plots
 
 ### Plot feature importance
