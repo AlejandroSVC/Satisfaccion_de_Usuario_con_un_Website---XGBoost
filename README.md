@@ -1,5 +1,6 @@
 # Predicting website user satisfaction
-## Using xgBoost Machine Learning Regression with Python
+## xgBoost Machine Learning Regression optimized with Optuna
+## Python code
 
 ![Banner delgado](docs/assets/images/Internet_users.jpg)
 
@@ -13,221 +14,150 @@ computational speed and model performance.
 ### Set working directory and load data
 ```
 import os
-
+os.chdir('C:/Users/Alejandro/Documents/')
 import pandas as pd
-
-os.chdir('dir')
-
-df = pd.read_csv('website365.csv')
-
-df.info()
+data = pd.read_csv('website365.csv')
+data.info()
 ```
 ### Import libraries
 ```
-import xgboost as xgb
-
 import numpy as np
-
-import seaborn as sns
-
-from numpy import asarray
-
-from numpy import mean
-
-from numpy import std
-
+import pandas as pd
+import xgboost as xgb
+import optuna
 from sklearn.datasets import make_regression
-
-from xgboost import XGBRegressor
-
-from sklearn.model_selection import cross_val_score
-
-from sklearn.model_selection import RepeatedKFold
-
-from matplotlib import pyplot
-```
-### Display correlation matrix
-```
-sns.heatmap(df.corr(), cmap='coolwarm')
-```
-![Correls](docs/assets/images/Correlation_matrix.png)
-
-### Dataset: extract features and target
-```
-X = df.drop('Satisfaction',axis=1)
-
-y = df['Satisfaction']
-```
-### Split the data into Train and Test datasets
-```
 from sklearn.model_selection import train_test_split
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30,
-                                                          shuffle=False,
-                                                          random_state = 1234)
+import matplotlib.pyplot as plt
+import seaborn as sns
 ```
-### Initialize the XGBoost regressor
+### 1. Separate features and target
 ```
-model = XGBRegressor(n_estimators=100, random_state=42)
+X = data.drop('Satisfaction', axis=1)
+y = data['Satisfaction']
 ```
-### Fit the xgBoost model to the data
+### Split data into train and test sets
 ```
-model.fit(X_train, y_train)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 ```
-### Make predictions on the test set
-```
-y_pred = model.predict(X_test)
-```
-### Calculate evaluation metrics
+### 2. Define objective function for Optuna
 ```
 from sklearn.metrics import root_mean_squared_error
 
+def objective(trial):
+    params = {
+        'objective': 'reg:squarederror',
+        'eval_metric': 'rmse',
+        'booster': trial.suggest_categorical('booster', ['gbtree', 'gblinear', 'dart']),
+        'lambda': trial.suggest_float('lambda', 1e-8, 1.0, log=True),
+        'alpha': trial.suggest_float('alpha', 1e-8, 1.0, log=True),
+        'max_depth': trial.suggest_int('max_depth', 1, 9),
+        'eta': trial.suggest_float('eta', 1e-8, 1.0, log=True),
+        'gamma': trial.suggest_float('gamma', 1e-8, 1.0, log=True),
+        'grow_policy': trial.suggest_categorical('grow_policy', ['depthwise', 'lossguide']),
+        'n_estimators': trial.suggest_int('n_estimators', 50, 500),
+        'subsample': trial.suggest_float('subsample', 0.1, 1.0),
+        'colsample_bytree': trial.suggest_float('colsample_bytree', 0.1, 1.0),
+        'min_child_weight': trial.suggest_int('min_child_weight', 1, 10),
+    }
+    
+    model = xgb.XGBRegressor(**params, random_state=42)
+    model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=False)
+    preds = model.predict(X_test)
+    rmse = root_mean_squared_error(y_test, preds)
+    return rmse
+```
+### 3. Run Optuna optimization
+```
+study = optuna.create_study(direction='minimize')
+study.optimize(objective, n_trials=50, show_progress_bar=True)
+```
+### 4. Train final model with best hyperparameters
+```
+best_params = study.best_params
+best_params['objective'] = 'reg:squarederror'
+best_params['random_state'] = 42
+
+final_model = xgb.XGBRegressor(**best_params)
+final_model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=True)
+```
+### 5. Evaluate the model
+```
+y_pred = final_model.predict(X_test)
+
+print("\nEvaluation Metrics:")
+```
+### Calculate evaluation metrics
+```
 from sklearn.metrics import mean_absolute_percentage_error, mean_squared_error, r2_score, explained_variance_score, mean_absolute_error
 
 mape = mean_absolute_percentage_error(y_test, y_pred)
-
 mse = mean_squared_error(y_test, y_pred)
-
 rmse = root_mean_squared_error(y_test, y_pred)
-
 mae = mean_absolute_error(y_test, y_pred)
-
 r2 = r2_score(y_test, y_pred)
-
 explained_var = explained_variance_score(y_test, y_pred)
 ```
 ### Print the evaluation metrics
 ```
-print("MAPE, mean absolute percentage error:", mape)
-
-print("MSE, Mean squared error:", mse)
-
-print("RMSE, Root mean squared error:", rmse)
-
-print("MAE, Mean absolute error:", mae)
-
-print("R2, R-squared:", r2)
-
-print("Explained variance:", explained_var)
+print(f"MAPE, mean absolute percentage error:", round(mape,5))
+print(f"MSE, Mean squared error:", round(mse,5))
+print(f"RMSE, Root mean squared error:", round(rmse,5))
+print(f"MAE, Mean absolute error:", round(mae,5))
+print(f"R2, R-squared:", round(r2,5))
+print(f"Explained variance:", round(explained_var,5))
 ```
-### Feature importance
+### PLOTS
+
+### 6. Feature importance
 ```
-importance = model.feature_importances_
-
-print(importance)
-```
-### Plot feature importance
-```
-import matplotlib.pyplot as plt
-
-fig, ax = plt.subplots(figsize=(10, 8))
-
-xgb.plot_importance(model, ax=ax, importance_type='gain', grid=False,
-                    show_values=True, values_format='{v:.2f}')
-
-plt.title('Feature Importance')
-
-plt.show()
-```
-![Features](docs/assets/images/Features_importance.png)
-
-### Plot actual vs predicted values, and actual vs predicted residuals
-```
-import matplotlib.pyplot as plt
-
-from sklearn.metrics import PredictionErrorDisplay
-
-from sklearn.pipeline import make_pipeline
-
-from sklearn.svm import SVR
-
-from sklearn.preprocessing import StandardScaler
-
-rng = np.random.default_rng(42)
-
-X = rng.random(size=(200, 2)) * 10
-
-y = X[:, 0]**2 + 5 * X[:, 1] + 10 + rng.normal(loc=0.0, scale=0.1, size=(200,))
-
-reg = make_pipeline(StandardScaler(), SVR(kernel='linear', C=10))
-
-reg.fit(X, y)
-
-fig, axes = plt.subplots(1, 2, figsize=(8, 4))
-
-PredictionErrorDisplay.from_estimator(reg, X, y, ax=axes[0], kind="actual_vs_predicted")
-
-PredictionErrorDisplay.from_estimator(reg, X, y, ax=axes[1], kind="residual_vs_predicted")
-
-plt.show()
-```
-![Plots](docs/assets/images/Predicted_plots.png)
-
-### Permutation feature importance
-
-Permutation feature importance is a powerful technique for evaluating the
-importance of features in a machine learning model.
-It works by randomly shuffling the values of each feature and measuring
-the decrease in the model’s performance.
-This provides a more reliable estimate of feature importance compared to
-built-in importance measures, as it takes into account the interaction
-between features.
-```
-from sklearn.inspection import permutation_importance
-
-perm_importance = permutation_importance(model, X_test, y_test, n_repeats=10, random_state=42)
-
-sorted_idx = perm_importance.importances_mean.argsort()
+feature_importance = final_model.feature_importances_
+sorted_idx = np.argsort(feature_importance)[::-1]
 
 plt.figure(figsize=(10, 6))
-
-plt.barh(range(len(sorted_idx)), perm_importance.importances_mean[sorted_idx], align='center')
-
-plt.yticks(range(len(sorted_idx)), [f'feature_{i}' for i in sorted_idx])
-
-plt.xlabel('Permutation Feature Importance')
-
-plt.ylabel('Feature')
-
-plt.title('Permutation Feature Importance (XGBoost)')
-
+plt.bar(range(X.shape[1]), feature_importance[sorted_idx], align='center')
+plt.xticks(range(X.shape[1]), sorted_idx)
+plt.xlabel('Feature index')
+plt.ylabel('Feature importance')
+plt.title('XGBoost Feature Importance')
 plt.tight_layout()
-
 plt.show()
 ```
-![Permutation](docs/assets/images/Permutation_feature_importance.png)
+![1_Feature_importance](docs/assets/images/1_Feature_importance.png)
 
-### Prediction error plot
-
-A prediction error plot shows the actual targets from the dataset against the
-predicted values generated by the model. This allows to see how much variance
-is in the model. Analysts can diagnose regression models using this plot by
-comparing against the 45 degree line, where the prediction exactly matches the model.
+### 7. Actual vs Predicted plot
 ```
-import yellowbrick
-
-from yellowbrick.regressor import PredictionError
-
-visualizer = PredictionError(model)
-
-visualizer.fit(X_train, y_train)  # Fit the training data to the visualizer
-
-visualizer.score(X_test, y_test)  # Evaluate the model on the test data
-
-visualizer.show()                 # Finalize and render the figure
+plt.figure(figsize=(8, 8))
+sns.scatterplot(x=y_test, y=y_pred, alpha=0.6)
+plt.plot([min(y_test), max(y_test)], [min(y_test), max(y_test)], '--r')
+plt.xlabel('Actual Values')
+plt.ylabel('Predicted Values')
+plt.title('Actual vs Predicted Values')
+plt.show()
 ```
-![Prediction](docs/assets/images/Prediction_error_plot.png)
+![2_Actual_vs_predicted_values](docs/assets/images/2_Actual_vs_predicted_values.png)
 
-### Residuals plots on training and testing data
+### 8. Residual plot
 ```
-from yellowbrick.regressor import ResidualsPlot
-
-visualizer = ResidualsPlot(model)
-
-visualizer.fit(X_train, y_train)  # Fit the training data to the visualizer
-
-visualizer.score(X_test, y_test)  # Evaluate the model on the test data
-
-visualizer.show()                 # Finalize and render the figure
+residuals = y_test - y_pred
+plt.figure(figsize=(8, 6))
+sns.scatterplot(x=y_pred, y=residuals, alpha=0.6)
+plt.axhline(y=0, color='r', linestyle='--')
+plt.xlabel('Predicted Values')
+plt.ylabel('Residuals')
+plt.title('Residual Plot')
+plt.show()
 ```
-![Residuals](docs/assets/images/Residuals_plot_on_training_and_testing_data.png)
+![3_Residual_plot](docs/assets/images/3_Residual_plot.png)
+
+### 9. Optimization history plot
+```
+optuna.visualization.plot_optimization_history(study).show()
+```
+![4_Optimization_history_plot](docs/assets/images/4_Optimization_history_plot.png)
+
+### 10. Parameter importance plot
+```
+optuna.visualization.plot_param_importances(study).show()
+```
+![5_Parameter_importance_plot](docs/assets/images/5_Parameter_importance_plot.png)
+
