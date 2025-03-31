@@ -1,5 +1,5 @@
 # Predicting website user satisfaction
-## xgBoost Machine Learning Regression optimized with Optuna
+## XGBoost Machine Learning Regression optimized with Optuna
 ## Python code
 
 ![Banner delgado](docs/assets/images/Internet_users.jpg)
