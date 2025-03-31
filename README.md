@@ -9,9 +9,9 @@
 XGBoost stands for eXtreme Gradient Boosting. It is focused on
 computational speed and model performance. 
 
-### PYTHON CODE:
+### Python code:
 
-### Set working directory and load data
+### 1. Set working directory and load data
 ```
 import os
 os.chdir('C:/Users/Alejandro/Documents/')
@@ -19,7 +19,7 @@ import pandas as pd
 data = pd.read_csv('website365.csv')
 data.info()
 ```
-### Import libraries
+### 2. Import libraries
 ```
 import numpy as np
 import pandas as pd
@@ -30,16 +30,16 @@ from sklearn.model_selection import train_test_split
 import matplotlib.pyplot as plt
 import seaborn as sns
 ```
-### 1. Separate features and target
+### 3. Separate features and target
 ```
 X = data.drop('Satisfaction', axis=1)
 y = data['Satisfaction']
 ```
-### Split data into train and test sets
+### 4. Split data into train and test sets
 ```
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 ```
-### 2. Define objective function for Optuna
+### 5. Define objective function for Optuna
 ```
 from sklearn.metrics import root_mean_squared_error
 
@@ -66,12 +66,12 @@ def objective(trial):
     rmse = root_mean_squared_error(y_test, preds)
     return rmse
 ```
-### 3. Run Optuna optimization
+### 6. Run Optuna optimization
 ```
 study = optuna.create_study(direction='minimize')
 study.optimize(objective, n_trials=50, show_progress_bar=True)
 ```
-### 4. Train final model with best hyperparameters
+### 7. Train final model with best hyperparameters
 ```
 best_params = study.best_params
 best_params['objective'] = 'reg:squarederror'
@@ -80,7 +80,7 @@ best_params['random_state'] = 42
 final_model = xgb.XGBRegressor(**best_params)
 final_model.fit(X_train, y_train, eval_set=[(X_test, y_test)], verbose=True)
 ```
-### 5. Evaluate the model
+### 8. Evaluate the model
 ```
 y_pred = final_model.predict(X_test)
 
@@ -106,9 +106,9 @@ print(f"MAE, Mean absolute error:", round(mae,5))
 print(f"R2, R-squared:", round(r2,5))
 print(f"Explained variance:", round(explained_var,5))
 ```
-### PLOTS
+### 9. Plots
 
-### 6. Feature importance
+### Plot feature importance
 ```
 feature_importance = final_model.feature_importances_
 sorted_idx = np.argsort(feature_importance)[::-1]
@@ -124,7 +124,7 @@ plt.show()
 ```
 ![1_Feature_importance](docs/assets/images/1_Feature_importance.png)
 
-### 7. Actual vs Predicted plot
+### Plot actual vs predicted values
 ```
 plt.figure(figsize=(8, 8))
 sns.scatterplot(x=y_test, y=y_pred, alpha=0.6)
@@ -136,7 +136,7 @@ plt.show()
 ```
 ![2_Actual_vs_predicted_values](docs/assets/images/2_Actual_vs_predicted_values.png)
 
-### 8. Residual plot
+### Plot residuals
 ```
 residuals = y_test - y_pred
 plt.figure(figsize=(8, 6))
@@ -149,13 +149,13 @@ plt.show()
 ```
 ![3_Residual_plot](docs/assets/images/3_Residual_plot.png)
 
-### 9. Optimization history plot
+### Plot optimization history
 ```
 optuna.visualization.plot_optimization_history(study).show()
 ```
 ![4_Optimization_history_plot](docs/assets/images/4_Optimization_history_plot.png)
 
-### 10. Parameter importance plot
+### Plot parameter importance
 ```
 optuna.visualization.plot_param_importances(study).show()
 ```
