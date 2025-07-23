@@ -1,7 +1,8 @@
 # Predicción de la satisfacción del usuario del sitio web
-## Regresión de aprendizaje automático de XGBoost optimizada con Optuna
 
 ![Banner delgado](docs/assets/images/Internet_users.jpg)
+
+## Regresión de aprendizaje automático de XGBoost optimizada con Optuna
 
 El algoritmo XGBoost significa "Impulso de Gradiente Extremo". Se centra en la velocidad computacional y el rendimiento del modelo.
 Optuna es un marco avanzado de optimización de hiperparámetros con visualizaciones para mayor interpretabilidad.
