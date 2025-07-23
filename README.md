@@ -1,4 +1,4 @@
-# Predicción de la satisfacción del usuario del sitio web
+# Predicción de la Satisfacción de Usuarios de un Sitio Web mediante Machine Learning
 
 ![Banner delgado](docs/assets/images/Internet_users.jpg)
 
